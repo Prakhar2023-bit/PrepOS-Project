@@ -3,6 +3,7 @@ from app.db.session import engine, Base
 from app.models import user, roadmap
 
 from app.api.routes import users
+from app.api.routes import users, roadmaps
 
 # This single line creates all your database tables automatically
 Base.metadata.create_all(bind=engine)
@@ -14,6 +15,7 @@ app = FastAPI(
 )
 
 app.include_router(users.router, prefix="/users", tags=["Users"])
+app.include_router(roadmaps.router, prefix="/roadmaps", tags=["Roadmaps"])
 
 @app.get("/")
 async def health_check():
