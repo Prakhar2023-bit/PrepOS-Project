@@ -2,13 +2,17 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from app.db.session import get_db
-from app.services.ai_engine import generate_career_roadmap
+from app.services.ai_engine import generate_career_roadmap, analyze_job_description
 
 router = APIRouter()
 
 # 1. The input schema (what the user types in)
 class RoadmapRequest(BaseModel):
     target_role: str
+    current_skills: str = "None specified"
+
+class JDRequest(BaseModel):
+    job_description: str
     current_skills: str = "None specified"
 
 # 2. The endpoint
@@ -25,6 +29,21 @@ def create_roadmap(request: RoadmapRequest):
         )
         
         # Return the generated JSON directly to the user/frontend
+        return {"status": "success", "data": roadmap_json}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@router.post("/analyze-jd")
+def analyze_jd_roadmap(request: JDRequest):
+    """
+    Paste a full Job Description and get a custom roadmap.
+    """
+    try:
+        roadmap_json = analyze_job_description(
+            job_description=request.job_description, 
+            current_skills=request.current_skills
+        )
         return {"status": "success", "data": roadmap_json}
         
     except Exception as e:
